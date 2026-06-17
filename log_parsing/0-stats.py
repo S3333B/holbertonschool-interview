@@ -17,24 +17,14 @@ def print_stats(total_size, status_counts):
 
 
 def parse_line(line):
-    """Parse one log line and return status code and file size."""
-    parts = line.split()
-
-    if len(parts) < 9:
-        return None
-
-    status_code = parts[-2]
-    file_size = parts[-1]
-
-    if status_code not in VALID_CODES:
-        return None
-
+    """Extract status code and file size from a log line."""
     try:
-        file_size = int(file_size)
-    except ValueError:
+        parts = line.split()
+        status_code = parts[-2]
+        file_size = int(parts[-1])
+        return status_code, file_size
+    except (IndexError, ValueError):
         return None
-
-    return status_code, file_size
 
 
 def main():
@@ -50,7 +40,11 @@ def main():
             if result is not None:
                 status_code, file_size = result
                 total_size += file_size
-                status_counts[status_code] = status_counts.get(status_code, 0) + 1
+
+                if status_code in VALID_CODES:
+                    status_counts[status_code] = (
+                        status_counts.get(status_code, 0) + 1
+                    )
 
             line_count += 1
 
